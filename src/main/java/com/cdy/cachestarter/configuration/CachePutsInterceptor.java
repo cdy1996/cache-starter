@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory;
  * Created by 陈东一
  * 2018/8/25 17:43
  */
-public class CachePutInterceptor extends CacheSupport implements MethodInterceptor {
+public class CachePutsInterceptor extends CacheSupport implements MethodInterceptor {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     
     @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-        return cachePutInvoke(methodInvocation);
+        return cachePutsInvoke(methodInvocation);
     }
     
     

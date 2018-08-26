@@ -6,6 +6,7 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Repeatable(CachePuts.class)
 public @interface CachePut {
     /**
      * 缓存的key
@@ -15,7 +16,7 @@ public @interface CachePut {
     /**
      * todo 缓存的条件
      */
-    String condition() default "";
+//    String condition() default "";
     
     /**
      * 缓存的失效时间
@@ -23,12 +24,8 @@ public @interface CachePut {
     int expire() default 3600;
     
     /**
-     * 指明具体的类,如果是集合则写集合装的对象的类
+     * 如果是集合则写集合装的对象的类
      */
-    Class<?> type();
+    Class<?> type() default Object.class;
     
-    /**
-     * 如果存储的是list,则设置为true
-     */
-    boolean isList() default false;
 }

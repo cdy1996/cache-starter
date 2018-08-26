@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Import;
 import java.lang.annotation.*;
 
 /**
- * todo
+ * 开启缓存注解
  * Created by 陈东一
  * 2018/8/25 18:32
  */

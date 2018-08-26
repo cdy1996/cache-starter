@@ -1,11 +1,7 @@
 package com.cdy.cachestarter.configuration;
 
-import com.cdy.common.util.cache.CacheUtil;
-import com.cdy.common.util.cache.redis.RedisUtil;
-import com.cdy.redisstarter.config.SingleRedisConfiguration;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
  * 2018/8/25 18:24
  */
 @Configuration
-@AutoConfigureAfter(SingleRedisConfiguration.class)
 public class CacheConfiguration {
 
     
@@ -23,10 +18,20 @@ public class CacheConfiguration {
     public CachePutInterceptor cachePutInterceptor(){
         return new CachePutInterceptor();
     }
+  
+    @Bean
+    public CachePutsInterceptor cachePutsInterceptor(){
+        return new CachePutsInterceptor();
+    }
     
     @Bean
     public CacheDelInterceptor cacheDelInterceptor(){
         return new CacheDelInterceptor();
+    }
+    
+    @Bean
+    public CacheDelsInterceptor cacheDelsInterceptor(){
+        return new CacheDelsInterceptor();
     }
     
     @Bean
@@ -36,9 +41,16 @@ public class CacheConfiguration {
         defaultPointcutAdvisor.setPointcut(pointcut);
         return defaultPointcutAdvisor;
     }
+    @Bean
+    public DefaultPointcutAdvisor cachePutsAdvisor(){
+        DefaultPointcutAdvisor defaultPointcutAdvisor = new DefaultPointcutAdvisor(cachePutsInterceptor());
+        AnnotationMatchingPointcut pointcut = new AnnotationMatchingPointcut(null ,CachePuts.class);
+        defaultPointcutAdvisor.setPointcut(pointcut);
+        return defaultPointcutAdvisor;
+    }
     
     @Bean
-    public DefaultPointcutAdvisor advisor(){
+    public DefaultPointcutAdvisor cacheDelAdvisor(){
         DefaultPointcutAdvisor defaultPointcutAdvisor = new DefaultPointcutAdvisor(cacheDelInterceptor());
         AnnotationMatchingPointcut pointcut = new AnnotationMatchingPointcut(null ,CacheDel.class);
         defaultPointcutAdvisor.setPointcut(pointcut);
@@ -46,9 +58,11 @@ public class CacheConfiguration {
     }
     
     @Bean
-    public CacheUtil cacheUtil(RedisUtil redisUtil){
-        return redisUtil;
+    public DefaultPointcutAdvisor cacheDelsAdvisor(){
+        DefaultPointcutAdvisor defaultPointcutAdvisor = new DefaultPointcutAdvisor(cacheDelsInterceptor());
+        AnnotationMatchingPointcut pointcut = new AnnotationMatchingPointcut(null ,CacheDels.class);
+        defaultPointcutAdvisor.setPointcut(pointcut);
+        return defaultPointcutAdvisor;
     }
     
-
 }
