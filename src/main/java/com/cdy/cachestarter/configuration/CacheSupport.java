@@ -1,7 +1,7 @@
 package com.cdy.cachestarter.configuration;
 
-import com.cdy.common.util.cache.CacheUtil;
-import com.cdy.common.util.serialization.JsonUtil;
+import com.cdy.cache.CacheUtil;
+import com.cdy.serialization.JsonUtil;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
