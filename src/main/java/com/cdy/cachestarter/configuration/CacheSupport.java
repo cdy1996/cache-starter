@@ -1,11 +1,13 @@
 package com.cdy.cachestarter.configuration;
 
 import com.cdy.cache.CacheUtil;
+import com.cdy.redis.RedisUtil;
 import com.cdy.serialization.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.ExpressionParser;
@@ -21,16 +23,22 @@ import java.util.List;
  * Created by 陈东一
  * 2018/8/25 21:08
  */
+@Slf4j
 public class CacheSupport {
     
-    private static final Logger log = LoggerFactory.getLogger(CacheSupport.class);
     private static final Object LOCK = new Object();
     
-    @Autowired
-    CacheUtil cacheUtil;
-    @Autowired
-    CacheProperties cacheProperties;
+    private CacheUtil cacheUtil;
+    private CacheProperties cacheProperties;
+
     
+    @EventListener(ContextRefreshedEvent.class)
+    public void initCacheUtil(ContextRefreshedEvent event){
+        ApplicationContext source = (ApplicationContext) event.getSource();
+        this.cacheUtil = CacheFactory.getCacheUtil(source.getBean(RedisUtil.class));
+        this.cacheProperties = source.getBean(CacheProperties.class);
+        log.info("初始化CacheSupport成功");
+    }
     
     /**
      * 解析缓存的key
@@ -52,6 +60,10 @@ public class CacheSupport {
         for (int i = 0; i < parameterNames.length; i++) {
             evaluationContext.setVariable(parameterNames[i], args[i]);
         }
+        //evaluationContext.setVariable("user", user); evaluationContext.setVariable("p1", "111");
+        //class User{ String name; Integer age; }
+        //parseExpression(#{#p1}_#{T(java.lang.Math).random()}_#{#user.getAge()}, , new TemplateParserContext()).getValue(evaluationContext, String.class);
+        //   ==> 111_0.12126690442479282_20
         String cacheKey = parser.parseExpression(prefix + key, new TemplateParserContext())
                 .getValue(evaluationContext, String.class);
         log.info("cache key is {}", cacheKey);

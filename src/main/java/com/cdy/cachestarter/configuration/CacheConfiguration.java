@@ -12,7 +12,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class CacheConfiguration {
-
+    
+    @Bean
+    public CacheSupport cacheSupport(){
+        return new CacheSupport();
+    }
     
     @Bean
     public CachePutInterceptor cachePutInterceptor(){

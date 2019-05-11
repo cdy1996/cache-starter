@@ -1,8 +1,8 @@
 package com.cdy.cachestarter.configuration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Method;
 
@@ -11,16 +11,17 @@ import java.lang.reflect.Method;
  * Created by 陈东一
  * 2018/8/25 17:43
  */
-public class CacheDelsInterceptor extends CacheSupport implements AfterReturningAdvice{
-    
-    private Logger log = LoggerFactory.getLogger(this.getClass());
+@Slf4j
+public class CacheDelsInterceptor implements AfterReturningAdvice{
 
+    @Autowired
+    private CacheSupport cacheSupport;
     
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
         CacheDels annotation = method.getAnnotation(CacheDels.class);
         for (CacheDel cacheDel : annotation.value()) {
-            cacheDelInvoke(method, cacheDel, args);
+            cacheSupport.cacheDelInvoke(method, cacheDel, args);
         }
     }
     

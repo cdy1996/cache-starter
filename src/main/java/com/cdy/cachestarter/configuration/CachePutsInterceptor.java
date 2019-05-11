@@ -1,21 +1,23 @@
 package com.cdy.cachestarter.configuration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 缓存添加的环绕切面
  * Created by 陈东一
  * 2018/8/25 17:43
  */
-public class CachePutsInterceptor extends CacheSupport implements MethodInterceptor {
-    private Logger log = LoggerFactory.getLogger(this.getClass());
+@Slf4j
+public class CachePutsInterceptor implements MethodInterceptor {
+    @Autowired
+    private CacheSupport cacheSupport;
     
     @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-        return cachePutsInvoke(methodInvocation);
+        return cacheSupport.cachePutsInvoke(methodInvocation);
     }
     
     
