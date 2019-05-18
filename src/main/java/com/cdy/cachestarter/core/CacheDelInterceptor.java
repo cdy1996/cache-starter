@@ -1,4 +1,4 @@
-package com.cdy.cachestarter.configuration;
+package com.cdy.cachestarter.core;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.AfterReturningAdvice;
@@ -19,7 +19,9 @@ public class CacheDelInterceptor implements AfterReturningAdvice{
     
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
-        cacheSupport.cacheDelInvoke(method, method.getAnnotation(CacheDel.class), args);
+        if (cacheSupport.getCacheProperties().getEnable().equalsIgnoreCase("true")) {
+            cacheSupport.cacheDelInvoke(method, method.getAnnotation(CacheDel.class), args);
+        }
     }
     
    

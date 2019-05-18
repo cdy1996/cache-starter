@@ -1,4 +1,4 @@
-package com.cdy.cachestarter.configuration;
+package com.cdy.cachestarter.core;
 
 
 import java.lang.annotation.*;

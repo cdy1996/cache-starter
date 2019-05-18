@@ -1,4 +1,4 @@
-package com.cdy.cachestarter.configuration;
+package com.cdy.cachestarter.core;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -11,13 +11,18 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 2018/8/25 17:43
  */
 @Slf4j
-public class CachePutsInterceptor implements MethodInterceptor {
+public class CachePutInterceptor implements MethodInterceptor {
+    
     @Autowired
     private CacheSupport cacheSupport;
     
     @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-        return cacheSupport.cachePutsInvoke(methodInvocation);
+        if (cacheSupport.getCacheProperties().getEnable().equalsIgnoreCase("true")) {
+            return cacheSupport.cachePutInvoke(methodInvocation);
+        } else {
+            return methodInvocation.proceed();
+        }
     }
     
     

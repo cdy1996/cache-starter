@@ -16,6 +16,5 @@ import java.lang.annotation.*;
 @EnableConfigurationProperties({CacheProperties.class})
 @Import({CacheSelector.class})
 public @interface EnableCache {
-    
-    String value() default CacheType.REDIS;
+
 }

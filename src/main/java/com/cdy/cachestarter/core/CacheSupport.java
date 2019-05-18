@@ -1,8 +1,9 @@
-package com.cdy.cachestarter.configuration;
+package com.cdy.cachestarter.core;
 
 import com.cdy.cache.CacheUtil;
-import com.cdy.redis.RedisUtil;
+import com.cdy.cachestarter.configuration.CacheProperties;
 import com.cdy.serialization.JsonUtil;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.context.ApplicationContext;
@@ -17,6 +18,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 缓存的辅助类
@@ -27,15 +29,21 @@ import java.util.List;
 public class CacheSupport {
     
     private static final Object LOCK = new Object();
-    
+    @Getter
     private CacheUtil cacheUtil;
+    @Getter
     private CacheProperties cacheProperties;
+    @Getter
+    private AtomicInteger total = new AtomicInteger(0);
+    @Getter
+    private AtomicInteger success = new AtomicInteger(0);
 
     
     @EventListener(ContextRefreshedEvent.class)
     public void initCacheUtil(ContextRefreshedEvent event){
         ApplicationContext source = (ApplicationContext) event.getSource();
-        this.cacheUtil = CacheFactory.getCacheUtil(source.getBean(RedisUtil.class));
+//        this.cacheUtil = CacheFactory.getCacheUtil(source);
+        this.cacheUtil = source.getBean(CacheUtil.class);
         this.cacheProperties = source.getBean(CacheProperties.class);
         log.info("初始化CacheSupport成功");
     }
@@ -86,7 +94,7 @@ public class CacheSupport {
         String cacheResult = null;
         CachePut annotation = methodInvocation.getMethod().getAnnotation(CachePut.class);
         Class<?> returnType = methodInvocation.getMethod().getReturnType();
-        
+        total.getAndDecrement();
         try {
             String key = parseKey(annotation.key(), methodInvocation.getMethod(), methodInvocation.getArguments(), cacheProperties.getPrefix());
             int expire = annotation.expire() == 0 ? cacheProperties.getExpireTime() : annotation.expire();
@@ -107,6 +115,7 @@ public class CacheSupport {
                 }
             } else {
                 log.info("cache hit \n {}", cacheResult);
+                success.getAndIncrement();
                 searchResult = convert(cacheResult, annotation, returnType);
             }
         } catch (Throwable throwable) {
@@ -125,7 +134,7 @@ public class CacheSupport {
         CachePuts annotation = methodInvocation.getMethod().getAnnotation(CachePuts.class);
         CachePut[] cachePuts = annotation.value();
         Class<?> returnType = methodInvocation.getMethod().getReturnType();
-      
+        total.getAndDecrement();
         try {
             String key = "";
             int expire = 0;
@@ -163,6 +172,7 @@ public class CacheSupport {
             //如果有一个能得到缓存对象,则刷新其他的缓存注解
             else {
                 log.info("cache hit \n {}", cacheResult);
+                success.getAndIncrement();
                 for (CachePut cachePut : cachePuts) {
                     key = parseKey(cachePut.key(), methodInvocation.getMethod(), methodInvocation.getArguments(), cacheProperties.getPrefix());
                     expire = cachePut.expire() == 0 ? cacheProperties.getExpireTime() : cachePut.expire();
